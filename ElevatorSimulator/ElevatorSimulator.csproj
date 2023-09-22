@@ -8,11 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\" />
     <Folder Include="Models\" />
-    <Folder Include="Enums\" />
     <Folder Include="Helpers\" />
-    <Folder Include="Classes\" />
+    <Folder Include="Constants\" />
     <Folder Include="Structs\" />
   </ItemGroup>
 
