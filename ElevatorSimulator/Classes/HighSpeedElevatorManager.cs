@@ -18,6 +18,11 @@ namespace ElevatorSimulator.Classes
             _elevators.Add(elevator);
         }
 
+        public IEnumerable<IElevator> GetAllElevators()
+        {
+            return _elevators.AsReadOnly();
+        }
+
         public int Count => _elevators.Count;
     }
 }

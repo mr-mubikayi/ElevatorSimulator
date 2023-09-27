@@ -4,9 +4,19 @@ namespace ElevatorSimulator.Interfaces
 {
     public interface IElevator
     {
-        public void GoToFloor(FloorLevel floorLevel);
-        public void Direction();
-        public void OpenDoor();
-        public void CloseDoor();
+        FloorLevel CurrentFloor { get; }
+        MovementStatus Direction { get; }
+
+        bool IsMoving { get; }
+        bool IsDoorOpened { get; }
+
+        int PassengerCount { get; }
+        int MaxPassengerCount { get; }
+
+        void GoToFloor(FloorLevel floorLevel);
+        void AddPassengers(int count);
+        void RemovePassengers(int count);
+        void OpenDoor();
+        void CloseDoor();
     }
 }

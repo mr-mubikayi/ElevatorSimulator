@@ -44,5 +44,14 @@ namespace ElevatorSimulator.Classes
                 }
             }
         }
+
+        public IEnumerable<IElevator> GetAllElevatorsOfType(ElevatorType type)
+        {
+            if (_managers.TryGetValue(type, out var manager))
+            {
+                return manager.GetAllElevators();
+            }
+            return new List<IElevator>();
+        }
     }
 }
