@@ -1,4 +1,5 @@
 ﻿using ElevatorSimulator.Classes;
+using ElevatorSimulator.Constants;
 using ElevatorSimulator.Enums;
 using ElevatorSimulator.Helpers;
 using ElevatorSimulator.Interfaces;
@@ -9,27 +10,15 @@ namespace ElevatorSimulator
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("\n       ELEVATOR SIMULATOR");
+            Console.WriteLine(DisplayTexts.TITLE_TEXT);
 
             var isProgramLoopActive = true;
-            var mainMenuText =
-@"
-
-.__________ Main Menu __________.
-|                               |
-|   1. Call Elevator            |
-|   2. Display Elevator Status  |
-|   3. Exit                     | 
-|_______________________________|
-
-Choose an Option (1, 2, 3): ";
-
             var elevatorFactory = new ElevatorFactory();
             elevatorFactory.AddElevators(ElevatorType.Passenger, 3);
 
             while (isProgramLoopActive)
             {
-                var userResponse = ValidNumberChecker.GetValidNumber(mainMenuText, 3);
+                var userResponse = ValidNumberChecker.GetValidNumber(DisplayTexts.MAIN_MENU_TEXT, 3);
 
                 switch (userResponse)
                 {
@@ -46,45 +35,45 @@ Choose an Option (1, 2, 3): ";
                         return;
 
                     default:
-                        Console.WriteLine("\nInvalid Option. Try Again.");
+                        Console.WriteLine(DisplayTexts.INVALID_OPTION_TEXT);
                         break;
                 }
             }
         }
+
         private static async Task CallElevator(ElevatorFactory elevatorFactory)
         {
-            var currentFloorInputText = "\nEnter Your Current Floor Number (1, 2, 3): ";
-            var currentFloorLevel = (FloorLevel)ValidNumberChecker.GetValidNumber(currentFloorInputText, 3) - 1;
-
+            var currentFloorLevel = GetFloorInput(DisplayTexts.ENTER_CURRENT_FLOOR_TEXT);
             var elevator = elevatorFactory.GetElevator(ElevatorType.Passenger, currentFloorLevel);
 
-            if(elevator == null)
+            if (elevator == null)
             {
-                Console.WriteLine("\nNo available elevators at the moment. Please wait.");
+                Console.WriteLine(DisplayTexts.NO_AVAILABLE_ELEVATOR_TEXT);
                 return;
             }
 
             await elevator.CallElevator(currentFloorLevel);
             await GoToDesiredFloor(elevator);
-
             DisplayElevatorStatus(elevatorFactory);
 
-            Console.Write("\nPress Any Key to continue");
+            Console.Write(DisplayTexts.KEY_PRESS_TEXT);
             Console.ReadKey();
         }
 
         private static async Task GoToDesiredFloor(IElevator elevator)
         {
-            var goToFloorText = $"\nEnter Your Desired Floor Level (1, 2, 3): ";
-            var desiredFloorLevel = (FloorLevel)ValidNumberChecker.GetValidNumber(goToFloorText, 3) - 1;
-
+            var desiredFloorLevel = GetFloorInput(DisplayTexts.ENTER_DESIRED_FLOOR_TEXT);
             await elevator.GoToFloor(desiredFloorLevel);
+        }
+
+        private static FloorLevel GetFloorInput(string message)
+        {
+            return (FloorLevel)ValidNumberChecker.GetValidNumber(message, 3) - 1;
         }
 
         private static void DisplayElevatorStatus(ElevatorFactory elevatorFactory)
         {
-            Console.WriteLine("\n.__________ Passengers Elevators Status __________.\n");
-
+            Console.WriteLine(DisplayTexts.PASSENGER_ELEVATOR_TEXT);
             DisplayElevatorStatusForType(elevatorFactory, ElevatorType.Passenger);
         }
 
@@ -92,13 +81,12 @@ Choose an Option (1, 2, 3): ";
         {
             var elevators = elevatorFactory.GetAllElevatorsByType(type).ToList();
 
-            for (int i = 0; i < elevators.Count; i++)
+            foreach (var elevator in elevators)
             {
-                Console.WriteLine(
-                    $"- Elevator {elevators[i].Id.ToString().Split('-')[0]}, " +
-                    $"Floor: {elevators[i].CurrentFloor}, " +
-                    $"Direction: {elevators[i].Direction}, " +
-                    $"Passengers: {elevators[i].PassengerCount}/{elevators[i].MaxPassengerCount}");
+                Console.WriteLine($"- {DisplayTexts.ELEVATOR_TEXT} {elevator.Id.ToString().Split('-')[0]}, " +
+                                  $"{DisplayTexts.FLOOR_TEXT} {elevator.CurrentFloor}, " +
+                                  $"{DisplayTexts.DIRECTION_TEXT} {elevator.Direction}, " +
+                                  $"{DisplayTexts.PASSENGERS_TEXT} {elevator.PassengerCount}/{elevator.MaxPassengerCount}");
             }
         }
     }

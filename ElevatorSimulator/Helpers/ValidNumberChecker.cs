@@ -1,4 +1,6 @@
-﻿namespace ElevatorSimulator.Helpers
+﻿using ElevatorSimulator.Constants;
+
+namespace ElevatorSimulator.Helpers
 {
     public static class ValidNumberChecker
     {
@@ -9,7 +11,7 @@
 
             if (string.IsNullOrWhiteSpace(input))
             {
-                Console.WriteLine("\nPlease Insert a Value.");
+                Console.WriteLine(DisplayTexts.ENTER_VALUE_TEXT);
                 return GetValidNumber(message, maxNumber);
             }
 
@@ -17,7 +19,7 @@
 
             if(!canParseValue)
             {
-                Console.WriteLine("\nInvalid number. Try again.");
+                Console.WriteLine(DisplayTexts.INVALID_OPTION_TEXT);
                 return GetValidNumber(message, maxNumber);
             }
 
@@ -27,7 +29,7 @@
             if (parsedResult > -1 && parsedResult <= maxNumber)
                 return parsedResult;
 
-            Console.WriteLine("\nInvalid number. Try again.");
+            Console.WriteLine(DisplayTexts.INVALID_OPTION_TEXT);
             return GetValidNumber(message, maxNumber);
         }
     }

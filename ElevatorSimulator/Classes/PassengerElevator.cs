@@ -30,27 +30,42 @@ namespace ElevatorSimulator.Classes
             _direction = MovementStatus.Stationary;
         }
 
-        public async Task CallElevator(FloorLevel currentFloorLevel)
+        private async Task MoveElevatorTo(FloorLevel targetFloorLevel)
         {
-            Console.WriteLine($"\nCalling elevator {_subStringGuid}...");
+            SetElevatorDirection(targetFloorLevel);
 
-            _direction = _currentFloor == currentFloorLevel
-                ? MovementStatus.Stationary
-                : (_currentFloor < currentFloorLevel ? MovementStatus.Up : MovementStatus.Down);
-
-            Console.WriteLine(_direction == MovementStatus.Stationary
-                ? $"Elevator {_subStringGuid} already at floor: {_currentFloor}"
-                : $"Elevator {_subStringGuid} moving from floor {_currentFloor} to {currentFloorLevel}...");
+            DisplayElevatorMovementMessage(targetFloorLevel);
 
             await OperationDelays.PassengerElevator(null);
 
             if (_direction != MovementStatus.Stationary)
             {
-                _currentFloor = currentFloorLevel;
+                _currentFloor = targetFloorLevel;
                 _direction = MovementStatus.Stationary;
 
-                Console.WriteLine($"Elevator {_subStringGuid} arrived at floor: {_currentFloor}");
+                Console.WriteLine(string.Format(DisplayTexts.ELEVATOR_ARRIVED_TEXT, _subStringGuid, _currentFloor));
             }
+        }
+
+        private void SetElevatorDirection(FloorLevel targetFloorLevel)
+        {
+            _direction = _currentFloor == targetFloorLevel
+                ? MovementStatus.Stationary
+                : (_currentFloor < targetFloorLevel ? MovementStatus.Up : MovementStatus.Down);
+        }
+
+        private void DisplayElevatorMovementMessage(FloorLevel targetFloorLevel)
+        {
+            Console.WriteLine(_direction == MovementStatus.Stationary
+                ? string.Format(DisplayTexts.ELEVATOR_ALREADY_AT_FLOOR_TEXT, _subStringGuid, _currentFloor)
+                : string.Format(DisplayTexts.ELEVATOR_MOVING_TEXT, _subStringGuid, _currentFloor, targetFloorLevel));
+        }
+
+        public async Task CallElevator(FloorLevel currentFloorLevel)
+        {
+            Console.WriteLine(string.Format(DisplayTexts.CALLING_ELEVATOR_TEXT, _subStringGuid));
+
+            await MoveElevatorTo(currentFloorLevel);
 
             await OpenDoor();
 
@@ -64,23 +79,7 @@ namespace ElevatorSimulator.Classes
 
         public async Task GoToFloor(FloorLevel desiredFloorLevel)
         {
-            _direction = _currentFloor == desiredFloorLevel
-                ? MovementStatus.Stationary
-                : (_currentFloor < desiredFloorLevel ? MovementStatus.Up : MovementStatus.Down);
-
-            Console.WriteLine(_direction == MovementStatus.Stationary
-                ? $"Elevator {_subStringGuid} already at floor: {_currentFloor}"
-                : $"Elevator {_subStringGuid} moving from floor {_currentFloor} to {desiredFloorLevel}...");
-
-            await OperationDelays.PassengerElevator(null);
-
-            if (_direction != MovementStatus.Stationary)
-            {
-                _currentFloor = desiredFloorLevel;
-                _direction = MovementStatus.Stationary;
-
-                Console.WriteLine($"Elevator {_subStringGuid} arrived at floor: {_currentFloor}");
-            }
+            await MoveElevatorTo(desiredFloorLevel);
 
             await OpenDoor();
 
@@ -90,47 +89,50 @@ namespace ElevatorSimulator.Classes
 
         public async Task OpenDoor()
         {
-            Console.WriteLine("Opening door...");
-
-            await OperationDelays.PassengerElevator(null);
-
-            _isDoorOpened = true;
-
-            Console.WriteLine("Door Opened.");
+            await HandleDoorOperation(true);
         }
 
         public async Task CloseDoor()
         {
-            Console.WriteLine("Closing door...");
+            await HandleDoorOperation(false);
+        }
+
+        private async Task HandleDoorOperation(bool isOpening)
+        {
+            Console.WriteLine(isOpening ? DisplayTexts.OPENING_DOOR_TEXT : DisplayTexts.CLOSING_DOOR_TEXT);
 
             await OperationDelays.PassengerElevator(null);
 
-            _isDoorOpened = false; 
+            _isDoorOpened = isOpening;
 
-            Console.WriteLine("Door Closed.");
+            Console.WriteLine(isOpening ? DisplayTexts.OPENED_DOOR_TEXT : DisplayTexts.CLOSED_DOOR_TEXT);
         }
 
         public void AddPassengers()
         {
-            var maxToBeEntered = MaxPassengerCount - PassengerCount;
-            var passengerExitText = $"\nElevator {_subStringGuid} has {PassengerCount} passengers " +
-                                    $"\nHow many are entering? ({maxToBeEntered} max): ";
-
-            var passengerCount = ValidNumberChecker.GetValidNumber(passengerExitText, maxToBeEntered);
-
-            PassengerCount += passengerCount;
-            Console.WriteLine($"{passengerCount} passengers entered. Current count: {PassengerCount}");
+            HandlePassengerChange(true);
         }
 
         public void RemovePassengers()
         {
-            var passengerExitText = $"\nElevator {_subStringGuid} has {PassengerCount} passengers " +
-                                    $"\nHow many are exiting?: ";
+            HandlePassengerChange(false);
+        }
 
-            var passengerCount = ValidNumberChecker.GetValidNumber(passengerExitText, PassengerCount);
+        private void HandlePassengerChange(bool isAdding)
+        {
+            var maxChange = isAdding ? MaxPassengerCount - PassengerCount : PassengerCount;
+            var actionText = isAdding ? DisplayTexts.ENTERING_TEXT : DisplayTexts.EXITING_TEXT;
+            var actionDoneText = isAdding ? DisplayTexts.ENTERED_TEXT : DisplayTexts.EXITED_TEXT;
+            var passengerPromptText = string.Format(DisplayTexts.PASSENGER_STATUS_TEXT, _subStringGuid, PassengerCount) +
+                                      string.Format(DisplayTexts.PASSENGER_ENTERING_TEXT, actionText, maxChange);
 
-            PassengerCount = Math.Max(PassengerCount - passengerCount, 0);
-            Console.WriteLine($"{passengerCount} passengers exited. Current count: {PassengerCount}");
+            var passengerCount = ValidNumberChecker.GetValidNumber(passengerPromptText, maxChange);
+
+            PassengerCount = isAdding 
+                ? PassengerCount + passengerCount 
+                : Math.Max(PassengerCount - passengerCount, 0);
+
+            Console.WriteLine(string.Format(DisplayTexts.PASSENGERS_ACTION_DONE_TEXT, passengerCount, actionDoneText, PassengerCount));
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using ElevatorSimulator.Enums;
+﻿using ElevatorSimulator.Constants;
+using ElevatorSimulator.Enums;
 using ElevatorSimulator.Interfaces;
 
 namespace ElevatorSimulator.Classes
@@ -29,7 +30,7 @@ namespace ElevatorSimulator.Classes
             if (_elevatorManagers.TryGetValue(type, out var manager))
                 return manager.GetAvailableElevator(passengerFloorNumber);
 
-            throw new ArgumentException($"\nNo manager found for elevator type {type}", nameof(type));
+            throw new ArgumentException($"{DisplayTexts.NO_AVAILABLE_MANAGER_TEXT} {type}", nameof(type));
         }
 
         public void AddElevators(ElevatorType type, int count)
