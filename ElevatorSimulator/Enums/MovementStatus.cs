@@ -2,8 +2,8 @@
 {
     public enum MovementStatus
     {
-        MovingUp,
-        MovingDown,
+        Up,
+        Down,
         Stationary
     }
 }

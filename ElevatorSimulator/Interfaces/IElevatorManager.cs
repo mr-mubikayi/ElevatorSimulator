@@ -1,10 +1,12 @@
-﻿namespace ElevatorSimulator.Interfaces
+﻿using ElevatorSimulator.Enums;
+
+namespace ElevatorSimulator.Interfaces
 {
     public interface IElevatorManager
     {
-        IElevator GetAvailableElevator();
+        int ElevatorsCount { get; }
         void AddElevator(IElevator elevator);
-        int Count { get; }
-        IEnumerable<IElevator> GetAllElevators(); // New method
+        IEnumerable<IElevator> GetAllElevators();
+        IElevator GetAvailableElevator(FloorLevel currentFloorNumber);
     }
 }

@@ -4,6 +4,8 @@ namespace ElevatorSimulator.Interfaces
 {
     public interface IElevator
     {
+        Guid Id { get; }
+
         FloorLevel CurrentFloor { get; }
         MovementStatus Direction { get; }
 
@@ -13,10 +15,13 @@ namespace ElevatorSimulator.Interfaces
         int PassengerCount { get; }
         int MaxPassengerCount { get; }
 
-        void GoToFloor(FloorLevel floorLevel);
-        void AddPassengers(int count);
-        void RemovePassengers(int count);
-        void OpenDoor();
-        void CloseDoor();
+        Task CallElevator(FloorLevel currentFloorLevel);
+        Task GoToFloor(FloorLevel desiredFloorLevel);
+        Task OpenDoor();
+        Task CloseDoor();
+
+        void AddPassengers();
+        void RemovePassengers();
+        
     }
 }

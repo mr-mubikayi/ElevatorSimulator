@@ -1,4 +1,6 @@
-﻿using ElevatorSimulator.Enums;
+﻿using ElevatorSimulator.Constants;
+using ElevatorSimulator.Enums;
+using ElevatorSimulator.Helpers;
 using ElevatorSimulator.Interfaces;
 
 namespace ElevatorSimulator.Classes
@@ -6,109 +8,126 @@ namespace ElevatorSimulator.Classes
     public class PassengerElevator : IElevator
     {
         private bool _isDoorOpened = false;
+        private string _subStringGuid = string.Empty;
+        private readonly Guid _id = Guid.NewGuid();
         private FloorLevel _currentFloor = FloorLevel.One;
-        private MovementStatus _direction = MovementStatus.Stationary;  
+        private MovementStatus _direction = MovementStatus.Stationary;
+
+        public Guid Id => _id;
 
         public FloorLevel CurrentFloor => _currentFloor;
         public MovementStatus Direction => _direction;
+
         public bool IsMoving => _direction != MovementStatus.Stationary;
         public bool IsDoorOpened => _isDoorOpened;
+
         public int PassengerCount { get; private set; }
-        public int MaxPassengerCount => Constants.Constants.MaxPassengerElevatorCount;
+        public int MaxPassengerCount => ElevatorMaxWeights.PassengerElevator;
 
-
-        public async void GoToFloor(FloorLevel floorLevel)
+        public PassengerElevator()
         {
-            _direction = 
-                _currentFloor == floorLevel 
+            _subStringGuid = _id.ToString().Split('-')[0];
+        }
+
+        public async Task CallElevator(FloorLevel currentFloorLevel)
+        {
+            Console.WriteLine($"\nCalling elevator {_subStringGuid}...");
+
+            _direction = _currentFloor == currentFloorLevel
                 ? MovementStatus.Stationary
-                : _currentFloor < floorLevel 
-                ? MovementStatus.MovingUp 
-                : MovementStatus.MovingDown;
+                : (_currentFloor < currentFloorLevel ? MovementStatus.Up : MovementStatus.Down);
 
-            if(_direction == MovementStatus.Stationary)
+            Console.WriteLine(_direction == MovementStatus.Stationary
+                ? $"Elevator {_subStringGuid} already at floor: {_currentFloor}"
+                : $"Elevator {_subStringGuid} moving from floor {_currentFloor} to {currentFloorLevel}...");
+
+            await OperationDelays.PassengerElevator(null);
+
+            if (_direction != MovementStatus.Stationary)
             {
-                _currentFloor = floorLevel;
-                return;
-            }
+                _currentFloor = currentFloorLevel;
+                _direction = MovementStatus.Stationary;
 
-            Console.WriteLine($"Elevator moving from floor {_currentFloor} to {floorLevel}");
+                Console.WriteLine($"Elevator {_subStringGuid} arrived at floor: {_currentFloor}");
 
-            await Task.Delay(Math.Abs(floorLevel - _currentFloor) * 1000);
+                await OpenDoor();
 
-            _currentFloor = floorLevel;
-            _direction = MovementStatus.Stationary;
+                if (PassengerCount > 0)
+                    RemovePassengers();
 
-            Console.WriteLine($"Elevator arrived at floor: {_currentFloor}");
+                AddPassengers();
+
+                await CloseDoor();
+            }          
         }
 
-        public void AddPassengers(int count)
+        public async Task GoToFloor(FloorLevel desiredFloorLevel)
         {
-            if (PassengerCount + count <= MaxPassengerCount)
+            _direction = _currentFloor == desiredFloorLevel
+                ? MovementStatus.Stationary
+                : (_currentFloor < desiredFloorLevel ? MovementStatus.Up : MovementStatus.Down);
+
+            Console.WriteLine(_direction == MovementStatus.Stationary
+                ? $"Elevator {_subStringGuid} already at floor: {_currentFloor}"
+                : $"Elevator {_subStringGuid} moving from floor {_currentFloor} to {desiredFloorLevel}...");
+
+            await OperationDelays.PassengerElevator(null);
+
+            if (_direction != MovementStatus.Stationary)
             {
-                PassengerCount += count;
-                Console.WriteLine($"{count} passengers entered. Current count: {PassengerCount}");
-            }
-            else
-            {
-                Console.WriteLine($"Overload Alert! Can't add {count} passengers.");
+                _currentFloor = desiredFloorLevel;
+                _direction = MovementStatus.Stationary;
+
+                Console.WriteLine($"Elevator {_subStringGuid} arrived at floor: {_currentFloor}");
+
+                await OpenDoor();
+                RemovePassengers();
             }
         }
 
-        public void RemovePassengers(int count)
-        {
-            PassengerCount = Math.Max(PassengerCount - count, 0);
-            Console.WriteLine($"{count} passengers exited. Current count: {PassengerCount}");
-        }
-
-        public async void OpenDoor()
+        public async Task OpenDoor()
         {
             Console.WriteLine("Opening door...");
 
-            await Task.Delay(2000);
+            await OperationDelays.PassengerElevator(null);
 
             _isDoorOpened = true;
 
-            Console.WriteLine("Door Opened");
+            Console.WriteLine("Door Opened.");
         }
 
-        public async void CloseDoor()
+        public async Task CloseDoor()
         {
             Console.WriteLine("Closing door...");
 
-            await Task.Delay(2000);
+            await OperationDelays.PassengerElevator(null);
 
-            _isDoorOpened = false;
+            _isDoorOpened = false; 
 
-            Console.WriteLine("Door Closed");
+            Console.WriteLine("Door Closed.");
         }
 
-        //// TODO: Extend this to keep track.
-        //private FloorLevel _currentFloor = FloorLevel.One;
+        public void AddPassengers()
+        {
+            var maxToBeEntered = MaxPassengerCount - PassengerCount;
+            var passengerExitText = $"\nElevator {_subStringGuid} has {PassengerCount} passengers " +
+                                    $"\nHow many are entering? ({maxToBeEntered} max): ";
 
-        //public void GoToFloor(FloorLevel floorLevel)
-        //{
-        //    // TODO: Implement the logic to move the elevator to the specified floor.
-        //    _currentFloor = floorLevel;
-        //    Console.WriteLine($"Passenger Elevator going to floor: {_currentFloor}");
-        //}
+            var passengerCount = ValidNumberChecker.GetValidNumber(passengerExitText, maxToBeEntered);
 
-        //public void Direction()
-        //{
-        //    // TODO: Implement the logic to decide the direction (up/down) based on current and destination floors.
-        //    Console.WriteLine("Passenger Elevator direction is set.");
-        //}
+            PassengerCount += passengerCount;
+            Console.WriteLine($"{passengerCount} passengers entered. Current count: {PassengerCount}");
+        }
 
-        //public void OpenDoor()
-        //{
-        //    // TODO: Implement the logic for opened door.
-        //    Console.WriteLine("Passenger Elevator door opened.");
-        //}
+        public void RemovePassengers()
+        {
+            var passengerExitText = $"\nElevator {_subStringGuid} has {PassengerCount} passengers " +
+                                    $"\nHow many are exiting?: ";
 
-        //public void CloseDoor()
-        //{
-        //    // TODO: Implement the logic for closed door.
-        //    Console.WriteLine("Passenger Elevator door closed.");
-        //}
+            var passengerCount = ValidNumberChecker.GetValidNumber(passengerExitText, PassengerCount);
+
+            PassengerCount = Math.Max(PassengerCount - passengerCount, 0);
+            Console.WriteLine($"{passengerCount} passengers exited. Current count: {PassengerCount}");
+        }
     }
 }

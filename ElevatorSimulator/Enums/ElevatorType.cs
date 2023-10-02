@@ -3,6 +3,8 @@
     public enum ElevatorType
     {
         Passenger,
-        HighSpeed
+        HighSpeed,
+        Glass,
+        Freight
     }
 }

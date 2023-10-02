@@ -5,30 +5,36 @@ namespace ElevatorSimulator.Classes
 {
     public class ElevatorFactory
     {
-        private readonly Dictionary<ElevatorType, IElevatorManager> _managers;
+        private readonly Dictionary<ElevatorType, IElevatorManager> _elevatorManagers;
 
         public ElevatorFactory()
         {
-            _managers = new Dictionary<ElevatorType, IElevatorManager>
+            _elevatorManagers = new Dictionary<ElevatorType, IElevatorManager>
             {
-                { ElevatorType.Passenger, new PassengerElevatorManager() },
-                { ElevatorType.HighSpeed, new HighSpeedElevatorManager() }
+                { ElevatorType.Passenger, new PassengerElevatorManager() }
+
+                /* 
+                    You can Initialize different types of elevators here
+                 
+                    Example :
+
+                    { ElevatorType.Freight, new FreightElevatorManager() }
+                    { ElevatorType.HighSpeed, new HighSpeedElevatorManager() }
+                */                   
             };
         }
 
-        public IElevator GetElevator(ElevatorType type)
+        public IElevator GetElevator(ElevatorType type, FloorLevel passengerFloorNumber)
         {
-            if (_managers.TryGetValue(type, out var manager))
-            {
-                return manager.GetAvailableElevator();
-            }
+            if (_elevatorManagers.TryGetValue(type, out var manager))
+                return manager.GetAvailableElevator(passengerFloorNumber);
 
-            throw new ArgumentException($"No manager found for elevator type {type}", nameof(type));
+            throw new ArgumentException($"\nNo manager found for elevator type {type}", nameof(type));
         }
 
         public void AddElevators(ElevatorType type, int count)
         {
-            if (_managers.TryGetValue(type, out var manager))
+            if (_elevatorManagers.TryGetValue(type, out var manager))
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -37,20 +43,29 @@ namespace ElevatorSimulator.Classes
                         case ElevatorType.Passenger:
                             manager.AddElevator(new PassengerElevator());
                             break;
-                        case ElevatorType.HighSpeed:
-                            manager.AddElevator(new HighSpeedElevator());
-                            break;
+
+                            /* 
+                               You can add different types of elevators here
+                                
+                                Example :
+
+                                case ElevatorType.Freight:
+                                    manager.AddElevator(new FreightElevator());
+                                    break;
+                                case ElevatorType.HighSpeed:
+                                    manager.AddElevator(new HighSpeedElevator());
+                                    break;
+                            */
                     }
                 }
             }
         }
 
-        public IEnumerable<IElevator> GetAllElevatorsOfType(ElevatorType type)
+        public IEnumerable<IElevator> GetAllElevatorsByType(ElevatorType type)
         {
-            if (_managers.TryGetValue(type, out var manager))
-            {
+            if (_elevatorManagers.TryGetValue(type, out var manager))
                 return manager.GetAllElevators();
-            }
+
             return new List<IElevator>();
         }
     }
