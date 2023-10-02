@@ -4,6 +4,9 @@ using ElevatorSimulator.Interfaces;
 
 namespace ElevatorSimulator.Classes
 {
+    /// <summary>
+    /// Manages operations and selection of passenger elevators.
+    /// </summary>
     public class PassengerElevatorManager : IElevatorManager
     {
         private readonly List<IElevator> _elevators = new List<IElevator>();

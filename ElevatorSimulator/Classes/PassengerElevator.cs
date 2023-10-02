@@ -5,6 +5,9 @@ using ElevatorSimulator.Interfaces;
 
 namespace ElevatorSimulator.Classes
 {
+    /// <summary>
+    /// Represents a passenger elevator and its operations.
+    /// </summary>
     public class PassengerElevator : IElevator
     {
         private readonly Guid _id;

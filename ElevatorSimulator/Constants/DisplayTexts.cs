@@ -1,10 +1,8 @@
 ﻿namespace ElevatorSimulator.Constants
 {
     /// <summary>
-    /// 
-    /// This class initializes all texts displayed in the application.
-    /// Different language translations can be added and initialized here if necessary.
-    /// 
+    /// Provides constant strings for display messages within the application.
+    /// This class serves as a central location for all UI texts, facilitating easy updates and potential translations.
     /// </summary>
     public static class DisplayTexts
     {

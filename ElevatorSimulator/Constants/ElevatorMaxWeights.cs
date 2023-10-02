@@ -1,16 +1,15 @@
 ﻿namespace ElevatorSimulator.Constants
 {
+    /// <summary>
+    /// Provides constants that represent the maximum weight capacities for various types of elevators.
+    /// </summary>
     public static class ElevatorMaxWeights
     {
+        /// <summary>
+        /// The maximum weight capacity for a standard passenger elevator.
+        /// </summary>
         public const int PassengerElevator = 8;
 
-        /*
-            Add different elevator max weights here
-        
-            Example:
-
-            public const int FreightElevator = 15;
-            public const int HighSpeedElevator = 10;
-         */
+        // Additional elevator types max weights can be added here.
     }
 }
