@@ -25,49 +25,74 @@ namespace ElevatorSimulator.Classes
             };
         }
 
-        public IElevator GetElevator(ElevatorType type, FloorLevel passengerFloorNumber)
+        public IElevator? GetElevator(ElevatorType type, FloorLevel passengerFloorNumber)
         {
-            if (_elevatorManagers.TryGetValue(type, out var manager))
-                return manager.GetAvailableElevator(passengerFloorNumber);
+            try
+            {
+                if (_elevatorManagers.TryGetValue(type, out var manager))
+                    return manager.GetAvailableElevator(passengerFloorNumber);
 
-            throw new ArgumentException($"{DisplayTexts.NO_AVAILABLE_MANAGER_TEXT} {type}", nameof(type));
+                Console.WriteLine(string.Format(DisplayTexts.NO_AVAILABLE_MANAGER_TEXT, type));
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format(DisplayTexts.ERROR_GETTING_ELEVATOR_TYPE_TEXT, type, ex.Message));
+                return null;
+            }
         }
 
         public void AddElevators(ElevatorType type, int count)
         {
-            if (_elevatorManagers.TryGetValue(type, out var manager))
+            try
             {
-                for (int i = 0; i < count; i++)
+                if (_elevatorManagers.TryGetValue(type, out var manager))
                 {
-                    switch (type)
+                    for (int i = 0; i < count; i++)
                     {
-                        case ElevatorType.Passenger:
-                            manager.AddElevator(new PassengerElevator());
-                            break;
+                        switch (type)
+                        {
+                            case ElevatorType.Passenger:
+                                manager.AddElevator(new PassengerElevator());
+                                break;
 
-                            /* 
-                               You can add different types of elevators here
-                                
-                                Example :
+                                /* 
+                                   You can add different types of elevators here
 
-                                case ElevatorType.Freight:
-                                    manager.AddElevator(new FreightElevator());
-                                    break;
-                                case ElevatorType.HighSpeed:
-                                    manager.AddElevator(new HighSpeedElevator());
-                                    break;
-                            */
+                                    Example :
+
+                                    case ElevatorType.Freight:
+                                        manager.AddElevator(new FreightElevator());
+                                        break;
+                                    case ElevatorType.HighSpeed:
+                                        manager.AddElevator(new HighSpeedElevator());
+                                        break;
+                                */
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format(DisplayTexts.ERROR_ADDING_ELEVATOR_TYPE_TEXT, type, ex.Message));
             }
         }
 
         public IEnumerable<IElevator> GetAllElevatorsByType(ElevatorType type)
         {
-            if (_elevatorManagers.TryGetValue(type, out var manager))
-                return manager.GetAllElevators();
+            try
+            {
+                if (_elevatorManagers.TryGetValue(type, out var manager))
+                    return manager.GetAllElevators();
 
-            return new List<IElevator>();
+                Console.WriteLine(string.Format(DisplayTexts.NO_AVAILABLE_MANAGER_TEXT, type));
+                return new List<IElevator>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format(DisplayTexts.ERROR_RETRIEVING_ELEVATOR_TYPE_TEXT, type, ex.Message));
+                return new List<IElevator>();
+            }
         }
     }
 }

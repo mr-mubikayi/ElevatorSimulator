@@ -7,6 +7,6 @@ namespace ElevatorSimulator.Interfaces
         int ElevatorsCount { get; }
         void AddElevator(IElevator elevator);
         IEnumerable<IElevator> GetAllElevators();
-        IElevator GetAvailableElevator(FloorLevel currentFloorNumber);
+        IElevator? GetAvailableElevator(FloorLevel currentFloorNumber);
     }
 }

@@ -63,28 +63,38 @@ namespace ElevatorSimulator.Classes
 
         public async Task CallElevator(FloorLevel currentFloorLevel)
         {
-            Console.WriteLine(string.Format(DisplayTexts.CALLING_ELEVATOR_TEXT, _subStringGuid));
+            try
+            {
+                Console.WriteLine(string.Format(DisplayTexts.CALLING_ELEVATOR_TEXT, _subStringGuid));
+                await MoveElevatorTo(currentFloorLevel);
+                await OpenDoor();
 
-            await MoveElevatorTo(currentFloorLevel);
+                if (PassengerCount > 0)
+                    RemovePassengers();
 
-            await OpenDoor();
-
-            if (PassengerCount > 0)
-                RemovePassengers();
-
-            AddPassengers();
-
-            await CloseDoor();
+                AddPassengers();
+                await CloseDoor();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format(DisplayTexts.ERROR_CALLING_ELEVATOR_TEXT, ex.Message));
+            }
         }
 
         public async Task GoToFloor(FloorLevel desiredFloorLevel)
         {
-            await MoveElevatorTo(desiredFloorLevel);
+            try
+            {
+                await MoveElevatorTo(desiredFloorLevel);
+                await OpenDoor();
 
-            await OpenDoor();
-
-            if (PassengerCount > 0)
-                RemovePassengers();
+                if (PassengerCount > 0)
+                    RemovePassengers();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format(DisplayTexts.ERROR_MOVING_ELEVATOR_TEXT, ex.Message));
+            }
         }
 
         public async Task OpenDoor()
@@ -110,12 +120,26 @@ namespace ElevatorSimulator.Classes
 
         public void AddPassengers()
         {
-            HandlePassengerChange(true);
+            try
+            {
+                HandlePassengerChange(true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format(DisplayTexts.ERROR_ADDING_PASSENGERS_TEXT, ex.Message));
+            }
         }
 
         public void RemovePassengers()
         {
-            HandlePassengerChange(false);
+            try
+            {
+                HandlePassengerChange(false);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format(DisplayTexts.ERROR_REMOVING_PASSENGERS_TEXT, ex.Message));
+            }
         }
 
         private void HandlePassengerChange(bool isAdding)

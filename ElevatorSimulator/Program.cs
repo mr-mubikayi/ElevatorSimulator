@@ -10,34 +10,41 @@ namespace ElevatorSimulator
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine(DisplayTexts.TITLE_TEXT);
-
-            var isProgramLoopActive = true;
-            var elevatorFactory = new ElevatorFactory();
-            elevatorFactory.AddElevators(ElevatorType.Passenger, 3);
-
-            while (isProgramLoopActive)
+            try
             {
-                var userResponse = ValidNumberChecker.GetValidNumber(DisplayTexts.MAIN_MENU_TEXT, 3);
+                Console.WriteLine(DisplayTexts.TITLE_TEXT);
 
-                switch (userResponse)
+                var isProgramLoopActive = true;
+                var elevatorFactory = new ElevatorFactory();
+                elevatorFactory.AddElevators(ElevatorType.Passenger, 3);
+
+                while (isProgramLoopActive)
                 {
-                    case 1:
-                        await CallElevator(elevatorFactory);
-                        break;
+                    var userResponse = ValidNumberChecker.GetValidNumber(DisplayTexts.MAIN_MENU_TEXT, 3);
 
-                    case 2:
-                        DisplayElevatorStatus(elevatorFactory);
-                        break;
+                    switch (userResponse)
+                    {
+                        case 1:
+                            await CallElevator(elevatorFactory);
+                            break;
 
-                    case 3:
-                        isProgramLoopActive = false;
-                        return;
+                        case 2:
+                            DisplayElevatorStatus(elevatorFactory);
+                            break;
 
-                    default:
-                        Console.WriteLine(DisplayTexts.INVALID_OPTION_TEXT);
-                        break;
+                        case 3:
+                            isProgramLoopActive = false;
+                            return;
+
+                        default:
+                            Console.WriteLine(DisplayTexts.INVALID_OPTION_TEXT);
+                            break;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format(DisplayTexts.ERROR_OCCURED, ex.Message));
             }
         }
 
@@ -68,7 +75,15 @@ namespace ElevatorSimulator
 
         private static FloorLevel GetFloorInput(string message)
         {
-            return (FloorLevel)ValidNumberChecker.GetValidNumber(message, 3) - 1;
+            try
+            {
+                return (FloorLevel)ValidNumberChecker.GetValidNumber(message, 3) - 1;
+            }
+            catch
+            {
+                Console.WriteLine(DisplayTexts.ERROR_GETTING_FLOOR_INPUT);
+                throw; 
+            }
         }
 
         private static void DisplayElevatorStatus(ElevatorFactory elevatorFactory)
