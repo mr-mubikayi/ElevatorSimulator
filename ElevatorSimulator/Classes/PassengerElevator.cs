@@ -7,26 +7,27 @@ namespace ElevatorSimulator.Classes
 {
     public class PassengerElevator : IElevator
     {
-        private bool _isDoorOpened = false;
-        private string _subStringGuid = string.Empty;
-        private readonly Guid _id = Guid.NewGuid();
-        private FloorLevel _currentFloor = FloorLevel.One;
-        private MovementStatus _direction = MovementStatus.Stationary;
+        private readonly Guid _id;
+        private bool _isDoorOpened;
+        private string _subStringGuid;
+        private FloorLevel _currentFloor;
+        private MovementStatus _direction;
 
         public Guid Id => _id;
-
         public FloorLevel CurrentFloor => _currentFloor;
         public MovementStatus Direction => _direction;
-
         public bool IsMoving => _direction != MovementStatus.Stationary;
         public bool IsDoorOpened => _isDoorOpened;
-
         public int PassengerCount { get; private set; }
         public int MaxPassengerCount => ElevatorMaxWeights.PassengerElevator;
 
         public PassengerElevator()
         {
+            _id = Guid.NewGuid();
+            _isDoorOpened = false;
             _subStringGuid = _id.ToString().Split('-')[0];
+            _currentFloor = FloorLevel.One;
+            _direction = MovementStatus.Stationary;
         }
 
         public async Task CallElevator(FloorLevel currentFloorLevel)
@@ -49,16 +50,16 @@ namespace ElevatorSimulator.Classes
                 _direction = MovementStatus.Stationary;
 
                 Console.WriteLine($"Elevator {_subStringGuid} arrived at floor: {_currentFloor}");
+            }
 
-                await OpenDoor();
+            await OpenDoor();
 
-                if (PassengerCount > 0)
-                    RemovePassengers();
+            if (PassengerCount > 0)
+                RemovePassengers();
 
-                AddPassengers();
+            AddPassengers();
 
-                await CloseDoor();
-            }          
+            await CloseDoor();
         }
 
         public async Task GoToFloor(FloorLevel desiredFloorLevel)
@@ -79,10 +80,12 @@ namespace ElevatorSimulator.Classes
                 _direction = MovementStatus.Stationary;
 
                 Console.WriteLine($"Elevator {_subStringGuid} arrived at floor: {_currentFloor}");
-
-                await OpenDoor();
-                RemovePassengers();
             }
+
+            await OpenDoor();
+
+            if (PassengerCount > 0)
+                RemovePassengers();
         }
 
         public async Task OpenDoor()
