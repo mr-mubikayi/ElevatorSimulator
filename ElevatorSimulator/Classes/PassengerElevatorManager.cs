@@ -5,6 +5,7 @@ using ElevatorSimulator.Interfaces;
 namespace ElevatorSimulator.Classes
 {
     /// <summary>
+    /// Implements the IElevatorManager interface
     /// Manages operations and selection of passenger elevators.
     /// </summary>
     public class PassengerElevatorManager : IElevatorManager

@@ -6,7 +6,9 @@ using ElevatorSimulator.Interfaces;
 namespace ElevatorSimulator.Classes
 {
     /// <summary>
-    /// Represents a passenger elevator and its operations.
+    /// Implements the IElevator interface
+    /// Represents a passenger elevator, handling the operations related to 
+    /// moving between floors, opening and closing doors, and managing passengers.
     /// </summary>
     public class PassengerElevator : IElevator
     {
