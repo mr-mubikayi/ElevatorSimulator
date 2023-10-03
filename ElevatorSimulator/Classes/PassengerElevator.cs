@@ -19,7 +19,6 @@ namespace ElevatorSimulator.Classes
         private FloorLevel _currentFloor;
         private MovementStatus _direction;
 
-
         public Guid Id => _id;
         public FloorLevel CurrentFloor => _currentFloor;
         public MovementStatus Direction => _direction;
