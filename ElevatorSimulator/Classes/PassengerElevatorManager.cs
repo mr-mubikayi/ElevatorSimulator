@@ -28,64 +28,51 @@ namespace ElevatorSimulator.Classes
         {
             try
             {
-                if (_elevators == null || !_elevators.Any())
-                {
-                    return null;
-                }
-
-                // First, filter out elevators with open doors or those that are full.
-                var availableElevators = _elevators
-                    .Where(e => !e.IsDoorOpened && e.PassengerCount < e.MaxPassengerCount)
+                // Filter out elevators on the same floor and stationary
+                var stationaryElevatorsOnSameFloor = _elevators
+                    .Where(e => e.CurrentFloor == currentPassengerFloorNumber && e.Direction == MovementStatus.Stationary)
                     .ToList();
 
-                // Check for elevators on the same floor that are not moving.
-                var elevatorOnSameFloor = availableElevators
-                    .FirstOrDefault(e => e.CurrentFloor == currentPassengerFloorNumber && !e.IsMoving);
+                if (stationaryElevatorsOnSameFloor.Any())
+                {
+                    return stationaryElevatorsOnSameFloor.OrderBy(e => e.PassengerCount).FirstOrDefault();
+                }
 
-                if (elevatorOnSameFloor != null)
-                    return elevatorOnSameFloor;
+                // Elevators moving towards the calling floor
+                var movingTowardsElevators = _elevators.Where(e =>
+                    (currentPassengerFloorNumber > e.CurrentFloor && e.Direction == MovementStatus.Up) ||
+                    (currentPassengerFloorNumber < e.CurrentFloor && e.Direction == MovementStatus.Down))
+                    .ToList();
 
-                // Check for elevators moving towards the current floor and will arrive before getting full.
-                var movingTowardElevator = availableElevators
-                    .FirstOrDefault(e =>
-                        ((e.Direction == MovementStatus.Up && e.CurrentFloor < currentPassengerFloorNumber) ||
-                         (e.Direction == MovementStatus.Down && e.CurrentFloor > currentPassengerFloorNumber)) &&
-                        (e.PassengerCount + (Math.Abs(e.CurrentFloor - currentPassengerFloorNumber)) <= e.MaxPassengerCount)
-                    );
+                if (movingTowardsElevators.Any())
+                {
+                    return movingTowardsElevators
+                        .OrderBy(e => Math.Abs(e.CurrentFloor - currentPassengerFloorNumber))
+                        .ThenBy(e => e.PassengerCount)
+                        .FirstOrDefault();
+                }
 
-                if (movingTowardElevator != null)
-                    return movingTowardElevator;
+                // Elevators that are stationary but not on the same floor or moving away
+                var otherElevators = _elevators.Where(e => e.Direction == MovementStatus.Stationary).ToList();
 
-                // For elevators moving away, find the one that will become stationary soonest.
-                var soonestAvailableElevator = availableElevators
-                    .Where(e =>
-                        (e.Direction == MovementStatus.Up && e.CurrentFloor > currentPassengerFloorNumber) ||
-                        (e.Direction == MovementStatus.Down && e.CurrentFloor < currentPassengerFloorNumber)
-                    )
-                    .OrderBy(e =>
-                        e.Direction == MovementStatus.Up ?
-                        (Enum.GetValues(typeof(FloorLevel)).Cast<FloorLevel>().Max() - e.CurrentFloor) :
-                        (int)e.CurrentFloor
-                    )
+                if (otherElevators.Any())
+                {
+                    return otherElevators
+                        .OrderBy(e => Math.Abs(e.CurrentFloor - currentPassengerFloorNumber))
+                        .ThenBy(e => e.PassengerCount)
+                        .FirstOrDefault();
+                }
+
+                // If no elevator meets the criteria, return any available elevator (though this shouldn't happen)
+                return _elevators.OrderBy(e => Math.Abs(e.CurrentFloor - currentPassengerFloorNumber))
+                    .ThenBy(e => e.PassengerCount)
                     .FirstOrDefault();
-
-                if (soonestAvailableElevator != null)
-                    return soonestAvailableElevator;
-
-                // If no elevators are moving toward the passenger or will be available soonest,
-                // then select the closest stationary elevator.
-                var closestElevator = availableElevators
-                    .Where(e => !e.IsMoving)
-                    .OrderBy(e => Math.Abs(e.CurrentFloor - currentPassengerFloorNumber))
-                    .FirstOrDefault();
-
-                return closestElevator;
             }
             catch (Exception ex)
             {
                 _consoleService.WriteLine(string.Format(DisplayTexts.ERROR_GETTING_ELEVATOR, ex.Message));
                 return null;
-            }       
+            }
         }
 
         public IEnumerable<IElevator> GetAllElevators()

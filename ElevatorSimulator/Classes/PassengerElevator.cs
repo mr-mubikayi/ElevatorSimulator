@@ -47,7 +47,6 @@ namespace ElevatorSimulator.Classes
             if (_direction != MovementStatus.Stationary)
             {
                 _currentFloor = targetFloorLevel;
-                _direction = MovementStatus.Stationary;
 
                 _consoleService.WriteLine(string.Format(DisplayTexts.ELEVATOR_ARRIVED_TEXT, _subStringGuid, _currentFloor));
             }
