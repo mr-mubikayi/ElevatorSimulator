@@ -1,4 +1,5 @@
 ﻿using ElevatorSimulator.Constants;
+using ElevatorSimulator.Interfaces;
 
 namespace ElevatorSimulator.Helpers
 {
@@ -17,25 +18,25 @@ namespace ElevatorSimulator.Helpers
         /// If the user provides invalid input, they will be prompted repeatedly until a valid integer is given.
         /// If a <paramref name="maxNumber"/> is provided, the input must also be less than or equal to this value.
         /// </remarks>
-        public static int GetValidNumber(string message, int? maxNumber)
+        public static int GetValidNumber(string message, int? maxNumber, IConsoleService consoleService)
         {
             try
             {
-                Console.Write(message);
-                var input = Console.ReadLine();
+                consoleService.Write(message);
+                var input = consoleService.ReadLine();
 
                 if (string.IsNullOrWhiteSpace(input))
                 {
-                    Console.WriteLine(DisplayTexts.ENTER_VALUE_TEXT);
-                    return GetValidNumber(message, maxNumber);
+                    consoleService.WriteLine(DisplayTexts.ENTER_VALUE_TEXT);
+                    return GetValidNumber(message, maxNumber, consoleService);
                 }
 
                 var canParseValue = int.TryParse(input, out var parsedResult);
 
                 if (!canParseValue)
                 {
-                    Console.WriteLine(DisplayTexts.INVALID_OPTION_TEXT);
-                    return GetValidNumber(message, maxNumber);
+                    consoleService.WriteLine(DisplayTexts.INVALID_OPTION_TEXT);
+                    return GetValidNumber(message, maxNumber, consoleService);
                 }
 
                 if (maxNumber == null)
@@ -44,13 +45,13 @@ namespace ElevatorSimulator.Helpers
                 if (parsedResult > -1 && parsedResult <= maxNumber)
                     return parsedResult;
 
-                Console.WriteLine(DisplayTexts.INVALID_OPTION_TEXT);
-                return GetValidNumber(message, maxNumber);
+                consoleService.WriteLine(DisplayTexts.INVALID_OPTION_TEXT);
+                return GetValidNumber(message, maxNumber, consoleService);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(string.Format(DisplayTexts.ERROR_OCCURED, ex.Message));
-                return GetValidNumber(message, maxNumber); // Prompt the user again if an unexpected error occured
+                consoleService.WriteLine(string.Format(DisplayTexts.ERROR_OCCURED, ex.Message));
+                return GetValidNumber(message, maxNumber, consoleService); // Prompt the user again if an unexpected error occured
             }
         }
     }

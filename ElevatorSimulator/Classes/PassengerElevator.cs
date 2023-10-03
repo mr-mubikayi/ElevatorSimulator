@@ -11,10 +11,12 @@ namespace ElevatorSimulator.Classes
     public class PassengerElevator : IElevator
     {
         private readonly Guid _id;
+        private readonly IConsoleService _consoleService;
         private bool _isDoorOpened;
         private string _subStringGuid;
         private FloorLevel _currentFloor;
         private MovementStatus _direction;
+
 
         public Guid Id => _id;
         public FloorLevel CurrentFloor => _currentFloor;
@@ -24,13 +26,14 @@ namespace ElevatorSimulator.Classes
         public int PassengerCount { get; private set; }
         public int MaxPassengerCount => ElevatorMaxWeights.PassengerElevator;
 
-        public PassengerElevator()
+        public PassengerElevator(IConsoleService consoleService)
         {
             _id = Guid.NewGuid();
             _isDoorOpened = false;
             _subStringGuid = _id.ToString().Split('-')[0];
             _currentFloor = FloorLevel.One;
             _direction = MovementStatus.Stationary;
+            _consoleService = consoleService;
         }
 
         private async Task MoveElevatorTo(FloorLevel targetFloorLevel)
@@ -46,7 +49,7 @@ namespace ElevatorSimulator.Classes
                 _currentFloor = targetFloorLevel;
                 _direction = MovementStatus.Stationary;
 
-                Console.WriteLine(string.Format(DisplayTexts.ELEVATOR_ARRIVED_TEXT, _subStringGuid, _currentFloor));
+                _consoleService.WriteLine(string.Format(DisplayTexts.ELEVATOR_ARRIVED_TEXT, _subStringGuid, _currentFloor));
             }
         }
 
@@ -59,7 +62,7 @@ namespace ElevatorSimulator.Classes
 
         private void DisplayElevatorMovementMessage(FloorLevel targetFloorLevel)
         {
-            Console.WriteLine(_direction == MovementStatus.Stationary
+            _consoleService.WriteLine(_direction == MovementStatus.Stationary
                 ? string.Format(DisplayTexts.ELEVATOR_ALREADY_AT_FLOOR_TEXT, _subStringGuid, _currentFloor)
                 : string.Format(DisplayTexts.ELEVATOR_MOVING_TEXT, _subStringGuid, _currentFloor, targetFloorLevel));
         }
@@ -68,7 +71,8 @@ namespace ElevatorSimulator.Classes
         {
             try
             {
-                Console.WriteLine(string.Format(DisplayTexts.CALLING_ELEVATOR_TEXT, _subStringGuid));
+                _consoleService.WriteLine(string.Format(DisplayTexts.CALLING_ELEVATOR_TEXT, _subStringGuid));
+
                 await MoveElevatorTo(currentFloorLevel);
                 await OpenDoor();
 
@@ -80,7 +84,7 @@ namespace ElevatorSimulator.Classes
             }
             catch (Exception ex)
             {
-                Console.WriteLine(string.Format(DisplayTexts.ERROR_CALLING_ELEVATOR_TEXT, ex.Message));
+                _consoleService.WriteLine(string.Format(DisplayTexts.ERROR_CALLING_ELEVATOR_TEXT, ex.Message));
             }
         }
 
@@ -96,7 +100,7 @@ namespace ElevatorSimulator.Classes
             }
             catch (Exception ex)
             {
-                Console.WriteLine(string.Format(DisplayTexts.ERROR_MOVING_ELEVATOR_TEXT, ex.Message));
+                _consoleService.WriteLine(string.Format(DisplayTexts.ERROR_MOVING_ELEVATOR_TEXT, ex.Message));
             }
         }
 
@@ -112,13 +116,13 @@ namespace ElevatorSimulator.Classes
 
         private async Task HandleDoorOperation(bool isOpening)
         {
-            Console.WriteLine(isOpening ? DisplayTexts.OPENING_DOOR_TEXT : DisplayTexts.CLOSING_DOOR_TEXT);
+            _consoleService.WriteLine(isOpening ? DisplayTexts.OPENING_DOOR_TEXT : DisplayTexts.CLOSING_DOOR_TEXT);
 
             await OperationDelays.PassengerElevator(null);
 
             _isDoorOpened = isOpening;
 
-            Console.WriteLine(isOpening ? DisplayTexts.OPENED_DOOR_TEXT : DisplayTexts.CLOSED_DOOR_TEXT);
+            _consoleService.WriteLine(isOpening ? DisplayTexts.OPENED_DOOR_TEXT : DisplayTexts.CLOSED_DOOR_TEXT);
         }
 
         public void AddPassengers()
@@ -129,7 +133,7 @@ namespace ElevatorSimulator.Classes
             }
             catch (Exception ex)
             {
-                Console.WriteLine(string.Format(DisplayTexts.ERROR_ADDING_PASSENGERS_TEXT, ex.Message));
+                _consoleService.WriteLine(string.Format(DisplayTexts.ERROR_ADDING_PASSENGERS_TEXT, ex.Message));
             }
         }
 
@@ -141,7 +145,7 @@ namespace ElevatorSimulator.Classes
             }
             catch (Exception ex)
             {
-                Console.WriteLine(string.Format(DisplayTexts.ERROR_REMOVING_PASSENGERS_TEXT, ex.Message));
+                _consoleService.WriteLine(string.Format(DisplayTexts.ERROR_REMOVING_PASSENGERS_TEXT, ex.Message));
             }
         }
 
@@ -153,13 +157,13 @@ namespace ElevatorSimulator.Classes
             var passengerPromptText = string.Format(DisplayTexts.PASSENGER_STATUS_TEXT, _subStringGuid, PassengerCount) +
                                       string.Format(DisplayTexts.PASSENGER_ENTERING_TEXT, actionText, maxChange);
 
-            var passengerCount = ValidNumberChecker.GetValidNumber(passengerPromptText, maxChange);
+            var passengerCount = ValidNumberChecker.GetValidNumber(passengerPromptText, maxChange, _consoleService);
 
             PassengerCount = isAdding 
                 ? PassengerCount + passengerCount 
                 : Math.Max(PassengerCount - passengerCount, 0);
 
-            Console.WriteLine(string.Format(DisplayTexts.PASSENGERS_ACTION_DONE_TEXT, passengerCount, actionDoneText, PassengerCount));
+            _consoleService.WriteLine(string.Format(DisplayTexts.PASSENGERS_ACTION_DONE_TEXT, passengerCount, actionDoneText, PassengerCount));
         }
     }
 }

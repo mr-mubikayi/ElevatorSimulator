@@ -10,8 +10,14 @@ namespace ElevatorSimulator.Classes
     public class PassengerElevatorManager : IElevatorManager
     {
         private readonly List<IElevator> _elevators = new List<IElevator>();
+        private readonly IConsoleService _consoleService;
 
         public int ElevatorsCount => _elevators.Count;
+
+        public PassengerElevatorManager(IConsoleService consoleService)
+        {
+            _consoleService = consoleService;      
+        }
 
         public void AddElevator(IElevator elevator)
         {
@@ -77,7 +83,7 @@ namespace ElevatorSimulator.Classes
             }
             catch (Exception ex)
             {
-                Console.WriteLine(string.Format(DisplayTexts.ERROR_GETTING_ELEVATOR, ex.Message));
+                _consoleService.WriteLine(string.Format(DisplayTexts.ERROR_GETTING_ELEVATOR, ex.Message));
                 return null;
             }       
         }
@@ -90,7 +96,7 @@ namespace ElevatorSimulator.Classes
             }
             catch (Exception ex)
             {
-                Console.WriteLine(string.Format(DisplayTexts.ERROR_GETTING_ALL_ELEVATORS, ex.Message));
+                _consoleService.WriteLine(string.Format(DisplayTexts.ERROR_GETTING_ALL_ELEVATORS, ex.Message));
                 return Enumerable.Empty<IElevator>();
             }
         }    

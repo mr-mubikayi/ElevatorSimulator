@@ -16,4 +16,10 @@
     <None Remove="Structs\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Moq" Version="4.20.69" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
+  </ItemGroup>
+
 </Project>

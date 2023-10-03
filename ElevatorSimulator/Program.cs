@@ -10,26 +10,28 @@ namespace ElevatorSimulator
     {
         static async Task Main(string[] args)
         {
+            IConsoleService consoleService = new ConsoleService();
+
             try
             {
-                Console.WriteLine(DisplayTexts.TITLE_TEXT);
+                consoleService.WriteLine(DisplayTexts.TITLE_TEXT);
 
                 var isProgramLoopActive = true;
-                var elevatorFactory = new ElevatorFactory();
+                var elevatorFactory = new ElevatorFactory(consoleService);
                 elevatorFactory.AddElevators(ElevatorType.Passenger, 3);
 
                 while (isProgramLoopActive)
                 {
-                    var userResponse = ValidNumberChecker.GetValidNumber(DisplayTexts.MAIN_MENU_TEXT, 3);
+                    var userResponse = ValidNumberChecker.GetValidNumber(DisplayTexts.MAIN_MENU_TEXT, 3, consoleService);
 
                     switch (userResponse)
                     {
                         case 1:
-                            await CallElevator(elevatorFactory);
+                            await CallElevator(elevatorFactory, consoleService);
                             break;
 
                         case 2:
-                            DisplayElevatorStatus(elevatorFactory);
+                            DisplayElevatorStatus(elevatorFactory, consoleService);
                             break;
 
                         case 3:
@@ -37,68 +39,68 @@ namespace ElevatorSimulator
                             return;
 
                         default:
-                            Console.WriteLine(DisplayTexts.INVALID_OPTION_TEXT);
+                            consoleService.WriteLine(DisplayTexts.INVALID_OPTION_TEXT);
                             break;
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(string.Format(DisplayTexts.ERROR_OCCURED, ex.Message));
+                consoleService.WriteLine(string.Format(DisplayTexts.ERROR_OCCURED, ex.Message));
             }
         }
 
-        private static async Task CallElevator(ElevatorFactory elevatorFactory)
+        private static async Task CallElevator(ElevatorFactory elevatorFactory, IConsoleService consoleService)
         {
-            var currentFloorLevel = GetFloorInput(DisplayTexts.ENTER_CURRENT_FLOOR_TEXT);
+            var currentFloorLevel = GetFloorInput(DisplayTexts.ENTER_CURRENT_FLOOR_TEXT, consoleService);
             var elevator = elevatorFactory.GetElevator(ElevatorType.Passenger, currentFloorLevel);
 
             if (elevator == null)
             {
-                Console.WriteLine(DisplayTexts.NO_AVAILABLE_ELEVATOR_TEXT);
+                consoleService.WriteLine(DisplayTexts.NO_AVAILABLE_ELEVATOR_TEXT);
                 return;
             }
 
             await elevator.CallElevator(currentFloorLevel);
-            await GoToDesiredFloor(elevator);
-            DisplayElevatorStatus(elevatorFactory);
+            await GoToDesiredFloor(elevator, consoleService);
+            DisplayElevatorStatus(elevatorFactory, consoleService);
 
-            Console.Write(DisplayTexts.KEY_PRESS_TEXT);
-            Console.ReadKey();
+            consoleService.Write(DisplayTexts.KEY_PRESS_TEXT);
+            consoleService.ReadKey();
         }
 
-        private static async Task GoToDesiredFloor(IElevator elevator)
+        private static async Task GoToDesiredFloor(IElevator elevator, IConsoleService consoleService)
         {
-            var desiredFloorLevel = GetFloorInput(DisplayTexts.ENTER_DESIRED_FLOOR_TEXT);
+            var desiredFloorLevel = GetFloorInput(DisplayTexts.ENTER_DESIRED_FLOOR_TEXT, consoleService);
             await elevator.GoToFloor(desiredFloorLevel);
         }
 
-        private static FloorLevel GetFloorInput(string message)
+        private static FloorLevel GetFloorInput(string message, IConsoleService consoleService)
         {
             try
             {
-                return (FloorLevel)ValidNumberChecker.GetValidNumber(message, 3) - 1;
+                return (FloorLevel)ValidNumberChecker.GetValidNumber(message, 3, consoleService) - 1;
             }
             catch
             {
-                Console.WriteLine(DisplayTexts.ERROR_GETTING_FLOOR_INPUT);
+                consoleService.WriteLine(DisplayTexts.ERROR_GETTING_FLOOR_INPUT);
                 throw; 
             }
         }
 
-        private static void DisplayElevatorStatus(ElevatorFactory elevatorFactory)
+        private static void DisplayElevatorStatus(ElevatorFactory elevatorFactory, IConsoleService consoleService)
         {
-            Console.WriteLine(DisplayTexts.PASSENGER_ELEVATOR_TEXT);
-            DisplayElevatorStatusForType(elevatorFactory, ElevatorType.Passenger);
+            consoleService.WriteLine(DisplayTexts.PASSENGER_ELEVATOR_TEXT);
+            DisplayElevatorStatusForType(elevatorFactory, ElevatorType.Passenger, consoleService);
         }
 
-        private static void DisplayElevatorStatusForType(ElevatorFactory elevatorFactory, ElevatorType type)
+        private static void DisplayElevatorStatusForType(ElevatorFactory elevatorFactory, ElevatorType type, IConsoleService consoleService)
         {
             var elevators = elevatorFactory.GetAllElevatorsByType(type).ToList();
 
             foreach (var elevator in elevators)
             {
-                Console.WriteLine($"- {DisplayTexts.ELEVATOR_TEXT} {elevator.Id.ToString().Split('-')[0]}, " +
+                consoleService.WriteLine($"- {DisplayTexts.ELEVATOR_TEXT} {elevator.Id.ToString().Split('-')[0]}, " +
                                   $"{DisplayTexts.FLOOR_TEXT} {elevator.CurrentFloor}, " +
                                   $"{DisplayTexts.DIRECTION_TEXT} {elevator.Direction}, " +
                                   $"{DisplayTexts.PASSENGERS_TEXT} {elevator.PassengerCount}/{elevator.MaxPassengerCount}");

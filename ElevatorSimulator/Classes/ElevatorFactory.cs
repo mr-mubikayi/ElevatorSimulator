@@ -10,12 +10,15 @@ namespace ElevatorSimulator.Classes
     public class ElevatorFactory
     {
         private readonly Dictionary<ElevatorType, IElevatorManager> _elevatorManagers;
+        private readonly IConsoleService _consoleService;
 
-        public ElevatorFactory()
+        public ElevatorFactory(IConsoleService consoleService)
         {
+            _consoleService = consoleService;
+
             _elevatorManagers = new Dictionary<ElevatorType, IElevatorManager>
             {
-                { ElevatorType.Passenger, new PassengerElevatorManager() }
+                { ElevatorType.Passenger, new PassengerElevatorManager(_consoleService) }
 
                  // Additional elevator types can be initialized here.                
             };
@@ -34,12 +37,13 @@ namespace ElevatorSimulator.Classes
                 if (_elevatorManagers.TryGetValue(type, out var manager))
                     return manager.GetAvailableElevator(passengerFloorNumber);
 
-                Console.WriteLine(string.Format(DisplayTexts.NO_AVAILABLE_MANAGER_TEXT, type));
+                _consoleService.WriteLine(string.Format(DisplayTexts.NO_AVAILABLE_MANAGER_TEXT, type));
+
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(string.Format(DisplayTexts.ERROR_GETTING_ELEVATOR_TYPE_TEXT, type, ex.Message));
+                _consoleService.WriteLine(string.Format(DisplayTexts.ERROR_GETTING_ELEVATOR_TYPE_TEXT, type, ex.Message));
                 return null;
             }
         }
@@ -60,7 +64,7 @@ namespace ElevatorSimulator.Classes
                         switch (type)
                         {
                             case ElevatorType.Passenger:
-                                manager.AddElevator(new PassengerElevator());
+                                manager.AddElevator(new PassengerElevator(_consoleService));
                                 break;
 
                                 // Additional elevator types here.
@@ -70,7 +74,7 @@ namespace ElevatorSimulator.Classes
             }
             catch (Exception ex)
             {
-                Console.WriteLine(string.Format(DisplayTexts.ERROR_ADDING_ELEVATOR_TYPE_TEXT, type, ex.Message));
+                _consoleService.WriteLine(string.Format(DisplayTexts.ERROR_ADDING_ELEVATOR_TYPE_TEXT, type, ex.Message));
             }
         }
 
@@ -86,12 +90,13 @@ namespace ElevatorSimulator.Classes
                 if (_elevatorManagers.TryGetValue(type, out var manager))
                     return manager.GetAllElevators();
 
-                Console.WriteLine(string.Format(DisplayTexts.NO_AVAILABLE_MANAGER_TEXT, type));
+                _consoleService.WriteLine(string.Format(DisplayTexts.NO_AVAILABLE_MANAGER_TEXT, type));
+
                 return new List<IElevator>();
             }
             catch (Exception ex)
             {
-                Console.WriteLine(string.Format(DisplayTexts.ERROR_RETRIEVING_ELEVATOR_TYPE_TEXT, type, ex.Message));
+                _consoleService.WriteLine(string.Format(DisplayTexts.ERROR_RETRIEVING_ELEVATOR_TYPE_TEXT, type, ex.Message));
                 return new List<IElevator>();
             }
         }
