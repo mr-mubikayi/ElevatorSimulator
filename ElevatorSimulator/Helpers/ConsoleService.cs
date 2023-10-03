@@ -2,6 +2,11 @@
 
 namespace ElevatorSimulator.Helpers
 {
+    /// <summary>
+    /// Implements the IConsoleService interface to provide a service for 
+    /// interacting with the console. This allows for abstracting away 
+    /// direct console operations and makes testing and mocking easier.
+    /// </summary>
     public class ConsoleService : IConsoleService
     {
         public ConsoleKeyInfo? ReadKey()
