@@ -1,4 +1,4 @@
-﻿using ElevatorSimulator.Constants;
+using ElevatorSimulator.Constants;
 using ElevatorSimulator.Enums;
 using ElevatorSimulator.Helpers;
 using ElevatorSimulator.Interfaces;
@@ -43,7 +43,15 @@ namespace ElevatorSimulator.Classes
 
             DisplayElevatorMovementMessage(targetFloorLevel);
 
-            await OperationDelays.PassengerElevator(null);
+            int floorsToMove = Math.Abs((int)_currentFloor - (int)targetFloorLevel);
+            if (floorsToMove > 0)
+            {
+                await OperationDelays.TravelBetweenFloors(floorsToMove);
+            }
+            else
+            {
+                await Task.Delay(500); // Small delay if already at floor
+            }
 
             if (_direction != MovementStatus.Stationary)
             {
@@ -77,9 +85,9 @@ namespace ElevatorSimulator.Classes
                 await OpenDoor();
 
                 if (PassengerCount > 0)
-                    RemovePassengers();
+                    await RemovePassengers();
 
-                AddPassengers();
+                await AddPassengers();
                 await CloseDoor();
             }
             catch (Exception ex)
@@ -96,7 +104,7 @@ namespace ElevatorSimulator.Classes
                 await OpenDoor();
 
                 if (PassengerCount > 0)
-                    RemovePassengers();
+                    await RemovePassengers();
             }
             catch (Exception ex)
             {
@@ -118,18 +126,18 @@ namespace ElevatorSimulator.Classes
         {
             _consoleService.WriteLine(isOpening ? DisplayTexts.OPENING_DOOR_TEXT : DisplayTexts.CLOSING_DOOR_TEXT);
 
-            await OperationDelays.PassengerElevator(null);
+            await OperationDelays.DoorOperation(isOpening);
 
             _isDoorOpened = isOpening;
 
             _consoleService.WriteLine(isOpening ? DisplayTexts.OPENED_DOOR_TEXT : DisplayTexts.CLOSED_DOOR_TEXT);
         }
 
-        public void AddPassengers()
+        public async Task AddPassengers()
         {
             try
             {
-                HandlePassengerChange(true);
+                await HandlePassengerChange(true);
             }
             catch (Exception ex)
             {
@@ -137,11 +145,11 @@ namespace ElevatorSimulator.Classes
             }
         }
 
-        public void RemovePassengers()
+        public async Task RemovePassengers()
         {
             try
             {
-                HandlePassengerChange(false);
+                await HandlePassengerChange(false);
             }
             catch (Exception ex)
             {
@@ -149,7 +157,7 @@ namespace ElevatorSimulator.Classes
             }
         }
 
-        private void HandlePassengerChange(bool isAdding)
+        private async Task HandlePassengerChange(bool isAdding)
         {
             var maxChange = isAdding ? MaxPassengerCount - PassengerCount : PassengerCount;
             var actionText = isAdding ? DisplayTexts.ENTERING_TEXT : DisplayTexts.EXITING_TEXT;
@@ -158,6 +166,9 @@ namespace ElevatorSimulator.Classes
                                       string.Format(DisplayTexts.PASSENGER_ENTERING_TEXT, actionText, maxChange);
 
             var passengerCount = ValidNumberChecker.GetValidNumber(passengerPromptText, maxChange, _consoleService);
+
+            if (passengerCount > 0)
+                await OperationDelays.PassengerTransfer(passengerCount, _consoleService, isAdding ? "Passenger entering" : "Passenger exiting");
 
             PassengerCount = isAdding 
                 ? PassengerCount + passengerCount 
