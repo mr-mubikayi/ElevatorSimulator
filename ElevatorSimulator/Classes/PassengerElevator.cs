@@ -46,7 +46,12 @@ namespace ElevatorSimulator.Classes
             int floorsToMove = Math.Abs((int)_currentFloor - (int)targetFloorLevel);
             if (floorsToMove > 0)
             {
-                await OperationDelays.TravelBetweenFloors(floorsToMove);
+                int direction = (int)Math.Sign((int)targetFloorLevel - (int)_currentFloor);
+                for (int i = 0; i < floorsToMove; i++)
+                {
+                    await OperationDelays.TravelBetweenFloors(1);
+                    SoundEffects.PlayMoveBetweenFloors();
+                }
             }
             else
             {
@@ -56,7 +61,7 @@ namespace ElevatorSimulator.Classes
             if (_direction != MovementStatus.Stationary)
             {
                 _currentFloor = targetFloorLevel;
-
+                SoundEffects.PlayArrival();
                 _consoleService.WriteLine(string.Format(DisplayTexts.ELEVATOR_ARRIVED_TEXT, _subStringGuid, _currentFloor));
             }
         }
@@ -125,6 +130,11 @@ namespace ElevatorSimulator.Classes
         private async Task HandleDoorOperation(bool isOpening)
         {
             _consoleService.WriteLine(isOpening ? DisplayTexts.OPENING_DOOR_TEXT : DisplayTexts.CLOSING_DOOR_TEXT);
+
+            if (isOpening)
+                SoundEffects.PlayDoorOpen();
+            else
+                SoundEffects.PlayDoorClose();
 
             await OperationDelays.DoorOperation(isOpening);
 
