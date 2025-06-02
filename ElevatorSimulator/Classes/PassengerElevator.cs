@@ -44,6 +44,7 @@ namespace ElevatorSimulator.Classes
             DisplayElevatorMovementMessage(targetFloorLevel);
 
             int floorsToMove = Math.Abs((int)_currentFloor - (int)targetFloorLevel);
+
             if (floorsToMove > 0)
             {
                 int direction = (int)Math.Sign((int)targetFloorLevel - (int)_currentFloor);
