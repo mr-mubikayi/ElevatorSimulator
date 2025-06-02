@@ -1,4 +1,4 @@
-﻿using ElevatorSimulator.Enums;
+using ElevatorSimulator.Enums;
 
 namespace ElevatorSimulator.Interfaces
 {
@@ -81,7 +81,7 @@ namespace ElevatorSimulator.Interfaces
         /// <remarks>
         /// The implementation should handle the logic for determining how many passengers to add and ensure that it doesn't exceed <see cref="MaxPassengerCount"/>.
         /// </remarks>
-        void AddPassengers();
+        Task AddPassengers();
 
         /// <summary>
         /// Removes passengers from the elevator.
@@ -89,6 +89,6 @@ namespace ElevatorSimulator.Interfaces
         /// <remarks>
         /// The implementation should handle the logic for determining how many passengers to remove.
         /// </remarks>
-        void RemovePassengers();
+        Task RemovePassengers();
     }
 }
